@@ -1,5 +1,15 @@
 # SnowSakura-FPGA
 
+> ## Final public development interval — 2026-07-24
+>
+> The HKEX OMD-C Exchange Feed Simulator and its downstream laboratory chain are complete, sealed, and retained as the Golden hardware source. SnowSakura now enters the final single-lane parser campaign.
+>
+> Approximately **two to three months** are reserved for implementation, physical closure, and measurement without incremental public performance claims. **This is the last interim project update. The next repository update will be the final SnowSakura single-lane parser evidence package.**
+>
+> Thank you to everyone who has watched, cloned, reviewed, challenged, or followed this work.
+>
+> **[Read the frozen evidence chain and final acceptance matrix →](EVIDENCE_CHAIN.md)**
+
 ## Deterministic Physical-Layer FPGA Architecture for HKEX OMD-C on ZU15EG / VU9P
 
 SnowSakura-FPGA is a physical-layer FPGA project for HKEX OMD-C market-data ingestion, deterministic receive normalization, fixed-slice parsing, arbitration, and latency-controlled TX release on Xilinx UltraScale+ devices.
@@ -25,6 +35,7 @@ The repository records both the active ZU15EG hardware-delivery path and the low
 ## Contents
 - [Current Hardware Status](#current-hardware-status--2026-07-24--exchange-simulator-completed-and-sealed)
 - [Current Progress](CURRENT_PROGRESS.md)
+- [Evidence Chain and Final Acceptance Matrix](EVIDENCE_CHAIN.md)
 - [Immediate Hardware Checklist](#immediate-hardware-checklist)
 - [HKEX OMD-C Exchange Feed Simulator](#hkex-omd-c-exchange-feed-simulator)
 - [Architecture Tracks](#architecture-tracks)
