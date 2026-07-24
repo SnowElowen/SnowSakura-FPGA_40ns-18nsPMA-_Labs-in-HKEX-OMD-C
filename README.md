@@ -1,14 +1,44 @@
 # SnowSakura-FPGA
 
-> ## Final public development interval — 2026-07-24
+> # PROJECT STATUS — ARCHIVED & DISCONTINUED
 >
-> The HKEX OMD-C Exchange Feed Simulator and its downstream laboratory chain are complete, sealed, and retained as the Golden hardware source. SnowSakura now enters the final single-lane parser campaign.
+> **Archive date:** 2026-07-25
 >
-> Approximately **two to three months** are reserved for implementation, physical closure, and measurement without incremental public performance claims. **This is the last interim project update. The next repository update will be the final SnowSakura single-lane parser evidence package.**
+> **Project milestone:** SnowSakura achieved a **50 ns HKEX OMD-C market-data parsing path** on the tested single-lane architecture. The evidence currently posted includes real-hardware TX ILA capture and Post-Implementation Timing Simulation of the five-stage registered fabric path: **RX ×3 + Parser ×1 + TX ×1**. Five registers contain four register-to-register intervals; the timing waveform records **12.420 ns** across those intervals at the implemented clock rate.
 >
-> Thank you to everyone who has watched, cloned, reviewed, challenged, or followed this work.
+> **Reason for discontinuation:** the next production layers—dual-line A/B arbitration, packet-loss recovery, retransmission, and FPGA Risk/Arb integration—require authentic order-book traffic and a real venue/prop-firm replay testbed. Synthetic lab vectors can prove the bounded RTL datapath, but they cannot predict or validate production loss, reordering, recovery, and replay behavior. Despite sustained interest and hundreds of unique clones, no prop firm or venue has offered the environment required to close those layers.
 >
-> **[Read the frozen evidence chain and final acceptance matrix →](EVIDENCE_CHAIN.md)**
+> **Final words:** apparently sub-microsecond latency and legacy infrastructure are sufficient for the ULL finance industry. SnowSakura is therefore frozen, and I am transferring the same high-speed FPGA/PCIe networking stack into **AI Accelerators and SmartNIC development, including RoCEv2, CXL, and deterministic accelerator interconnects**.
+>
+> Thanks to all the silent observers who kept cloning. **You kept the clone graph alive; the missing testbed kept production validation dead. Goodbye.**
+
+## Final evidence currently posted
+
+### Hardware ILA — TX frame launch
+
+![Hardware ILA showing TX frame launch](img/2026-07-25_ila_tx_frame_launch.png)
+
+The hardware capture shows the registered TX source leaving the idle word, asserting the frame transaction, and presenting the first programmed word at the TX observation boundary.
+
+### Hardware ILA — complete programmed TX frame
+
+![Hardware ILA showing the complete programmed TX frame](img/2026-07-25_ila_tx_complete_frame.png)
+
+The ILA records `frame_busy = 1`, the one-cycle `frame_start` pulse, sequential word indices, and the programmed data words before the source returns to the idle pattern. This is silicon evidence that the fabric generator owns and drives the tested TX frame.
+
+### Post-Implementation Timing Simulation — five registered stages
+
+![Post-Implementation Timing Simulation of the five-stage RX Parser TX path](img/2026-07-25_post_impl_rx3_parser1_tx1.png)
+
+The implemented netlist simulation covers the registered **RX3 + Parser1 + TX1** path. The two cursors mark **111.588 ns** and **124.008 ns**, a delta of **12.420 ns**. This is four clock intervals between five FF boundaries; it does not mean that one FF disappeared.
+
+## Final archive package
+
+Before the end of next week, this repository will receive the consolidated receiver **Eye Scan / BER record** and the final **simulated HKEX Exchange Feed Simulator** evidence package. An Eye Scan and a `10^15`-bit BER run are different measurements; the `10^15` depth will be claimed only with its counter log.
+
+For me, this project produced an enormous engineering gain: from RTL and simulation into GTHE4 data ownership, clock/reset construction, GTH Raw32 transport, real SFP/OM4 hardware, FDRE/LUT-level structure, Post-Route STA, Post-Implementation Timing Simulation, ILA evidence, OMD-C byte arithmetic, stateful order updates, price-level aggregation, and registered snapshots. The production continuation was blocked by the missing external test environment, not by an unfinished laboratory datapath.
+
+Everything below is retained as the **pre-archive historical engineering record**. References to an “active engineering stage” describe the repository state immediately before this archive notice.
 
 ## Deterministic Physical-Layer FPGA Architecture for HKEX OMD-C on ZU15EG / VU9P
 
