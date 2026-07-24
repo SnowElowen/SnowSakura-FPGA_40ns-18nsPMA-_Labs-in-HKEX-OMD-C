@@ -10,7 +10,17 @@
 >
 > **Final words:** apparently sub-microsecond latency and legacy infrastructure are sufficient for the ULL finance industry. SnowSakura is therefore frozen, and I am transferring the same high-speed FPGA/PCIe networking stack into **AI Accelerators and SmartNIC development, including RoCEv2, CXL, and deterministic accelerator interconnects**.
 >
-> Thanks to all the silent observers who kept cloning. **You kept the clone graph alive; the missing testbed kept production validation dead. Goodbye.**
+> Thanks to all the silent observers who kept cloning.
+> SnowSakura was never intended to be an HKEX-only experiment.
+> It was built to establish a reusable low-latency FPGA path across HKEX OMD-C, CME, SGX and other exchange feeds.
+> I completed the hardware, timing and parser evidence that can be completed independently. Not a single firm, venue or market participant from HKEX, CME or SGX offered even the minimum required next step: a technical conversation, anonymized replay data, expected output, or a validation environment.
+
+Without that, there is nothing meaningful left to build. 
+More exchange-specific RTL would only be synthetic code written against synthetic assumptions. 
+The limiting factor is no longer FPGA engineering. The limiting factor is an industry that repeatedly clones the work while refusing to provide even a near-zero-cost validation opportunity.
+
+Therefore SnowSakura-HFT is frozen. No further HFT development will be published unless a real counterparty brings real data, a real test environment and a real intention to cooperate. Cloning the repository is not cooperation, and silent observation does not entitle anyone to future updates.
+> **You kept the clone graph alive; the missing testbed kept production validation dead. Goodbye.**
 
 ## Final evidence currently posted
 
