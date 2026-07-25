@@ -6,7 +6,7 @@
 
 The public SnowSakura-FPGA development cycle is finished. The final repository state records a real Puzhi ZU15EG optical laboratory chain, fabric-owned programmed transmission, Raw32 registered reception, bounded alignment, fixed HKEX OMD-C parsing, stateful order updates, 64-bit price-level aggregation, top-of-book selection, coherent snapshot export, implementation timing closure, Post-Implementation Timing Simulation, ILA evidence, and receiver Eye Scan evidence.
 
-There is no active public next stage and no scheduled stream of incremental updates. The repository is retained as the final technical record and as the entry point for private bitstream or custom-protocol work.
+There is no active public RTL-development stage and no scheduled stream of incremental updates. The only remaining appendix is the final `10^15`-bit BER counter record and corresponding Eye Scan. This physical sign-off addition does not reopen RX C1/C2/C3, Parser P1, TX T1, XDC, Pblock, or the completed implementation. Active engineering focus is now moving to other repositories; this repository is retained as the final technical record and as the entry point for private bitstream or custom-protocol work.
 
 ## Frozen hardware identity
 
@@ -28,7 +28,7 @@ There is no active public next stage and no scheduled stream of incremental upda
 | TX ownership | ILA captures frame start, busy state, sequential indices, and complete programmed data |
 | Optical path | real SFP2/X0Y6 TX → OM4 → SFP1/X0Y7 RX |
 | Eye Scan | 77.78% open UI and open area 6720 at configured `1e-10` dwell BER |
-| BERT exercise | `10^8` recorded bits |
+| BERT exercise | current record `10^8` bits; final `10^15`-bit result will be appended after completion |
 | Alignment | stable `align_locked = 1` |
 | Parser | repeated `parsed_valid`, `parsed_error = 0` |
 | Protocol forms | Add, Modify, two-message packet, and Heartbeat packet arithmetic demonstrated |
