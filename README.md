@@ -42,6 +42,17 @@ The ILA records `frame_busy = 1`, the one-cycle `frame_start` pulse, sequential 
 
 The implemented netlist simulation covers the registered **RX3 + Parser1 + TX1** path. The two cursors mark **111.588 ns** and **124.008 ns**, a delta of **12.420 ns**. This is four clock intervals between five FF boundaries; it does not mean that one FF disappeared.
 
+
+### Implemented timing closure and RX registered-boundary audit
+
+![Implemented design timing summary](img/2026-07-25_post_impl_timing_summary.jpeg)
+
+The implemented design Timing Summary records **WNS = +0.239 ns**, **WHS = +0.017 ns**, zero failing endpoints, and all specified timing constraints met.
+
+![RX registered-boundary path audit under the 0.900 ns constraint](img/2026-07-25_rx_registered_path_0900ns.png)
+
+The `rxusrclk_322m` path audit shows the bounded registered RX boundary under its dedicated **0.900 ns** path requirement. The worst displayed path has **0 LUT levels**, **0.546 ns total delay** (**0.076 ns logic + 0.470 ns net**) and **+0.379 ns slack**. This is a local register-to-register constraint result, distinct from the full `rxusrclk_322m` clock period.
+
 ## Final archive package
 
 Before the end of next week, this repository will receive the consolidated receiver **Eye Scan / BER record** and the final **simulated HKEX Exchange Feed Simulator** evidence package. An Eye Scan and a `10^15`-bit BER run are different measurements; the `10^15` depth will be claimed only with its counter log.
