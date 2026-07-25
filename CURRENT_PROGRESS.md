@@ -1,77 +1,61 @@
-# SnowSakura-FPGA — Current Progress
+# SnowSakura-FPGA — Final Completed State
 
-## 2026-07-24 — HKEX OMD-C Exchange Feed Simulator Completed and Sealed
+## Status
 
-The Puzhi ZU15EG laboratory system is now complete from the Golden fabric TX source through the real optical link, continuous OMD-C parsing, authoritative order-state updates, price-level aggregation, top-of-book selection, and registered snapshot export.
+**Completed and frozen on 2026-07-25.**
 
-The simulator is no longer an unfinished parser foundation. It is a sealed Golden hardware test source for the next SnowSakura single-lane Fast-Candidate work.
+The public SnowSakura-FPGA development cycle is finished. The final repository state records a real Puzhi ZU15EG optical laboratory chain, fabric-owned programmed transmission, Raw32 registered reception, bounded alignment, fixed HKEX OMD-C parsing, stateful order updates, 64-bit price-level aggregation, top-of-book selection, coherent snapshot export, implementation timing closure, Post-Implementation Timing Simulation, ILA evidence, and receiver Eye Scan evidence.
 
-## Completed physical path
+There is no active public next stage and no scheduled stream of incremental updates. The repository is retained as the final technical record and as the entry point for private bitstream or custom-protocol work.
 
-```text
-GTHE4_CHANNEL_X0Y6 TX pins / SFP2
-    -> 10G-SR transmitter optics
-    -> OM4 fibre
-    -> SFP1 receiver optics
-    -> GTHE4_CHANNEL_X0Y7 RX pins
-    -> X0Y7 RX sampler
-    -> Raw32 alignment and packet capture
+## Frozen hardware identity
+
+| Item | Frozen value |
+|---|---|
+| Device | `XCZU15EG-FFVB1156-2-I` |
+| Serial rate | 10.3125 Gb/s |
+| Physical direction | X0Y6/SFP2 TX → 10G-SR → OM4 → SFP1/X0Y7 RX |
+| Receive baseline | GTH Raw Mode, RX Buffer ON |
+| Transmit baseline | TX Buffer Bypass |
+| Golden source | fabric-owned custom Raw32 OMD-C laboratory stream |
+| User-clock class | 322.265625 MHz operating point / 322.56 MHz timing target |
+| Registered fabric pipeline | RX ×3 + Parser ×1 + TX ×1 |
+
+## Final evidence
+
+| Boundary | Result |
+|---|---|
+| TX ownership | ILA captures frame start, busy state, sequential indices, and complete programmed data |
+| Optical path | real SFP2/X0Y6 TX → OM4 → SFP1/X0Y7 RX |
+| Eye Scan | 77.78% open UI and open area 6720 at configured `1e-10` dwell BER |
+| BERT exercise | `10^8` recorded bits |
+| Alignment | stable `align_locked = 1` |
+| Parser | repeated `parsed_valid`, `parsed_error = 0` |
+| Protocol forms | Add, Modify, two-message packet, and Heartbeat packet arithmetic demonstrated |
+| Book state | Order State Delta, 64-bit aggregation, Top-of-Book, versioned snapshot |
+| Implemented timing | WNS `+0.239 ns`, WHS `+0.017 ns`, zero failing endpoints |
+| RX local path | 0 LUT levels, 0.546 ns delay, `+0.379 ns` slack under 0.900 ns |
+| Implemented fabric timing | 12.420 ns across four intervals between five registered boundaries |
+
+## Closed chain
+
+~~~text
+Golden fabric TX
+    -> GTH/SFP/OM4/GTH RX
+    -> registered Raw32 capture
+    -> bounded marker/alignment
+    -> 12 x 32-bit packet capture
     -> fixed Message 0 parser
     -> Order State Delta
     -> 64-bit Price-Level Aggregator
-    -> Top-of-Book Bitmap / priority selection
-    -> Register Snapshot export
-```
+    -> Top-of-Book
+    -> versioned Register Snapshot
+~~~
 
-## Hardware proof
+Simulation, synthesis, implementation, post-route timing, bitstream/ILA regression, Post-Implementation Timing Simulation, and Eye Scan are all represented in the final evidence package.
 
-| Boundary | Completed result |
-|---|---|
-| GTH and optics | X0Y6/SFP2 TX pins → optics → OM4 → X0Y7/SFP1 RX pins |
-| Eye Scan | X0Y7 RX sampler, open UI 77.78% and open area 6720 at the 1e-10 dwell BER setting |
-| Receiver | RX Buffer ON, stable user-clock-domain Raw32 stream |
-| Alignment | `align_locked = 1` continuously |
-| Packet stream | `PktSize / MsgCount` rotates through `16'h004C / 2`, `16'h0010 / 0`, and `16'h0030 / 1` |
-| Parser output | repeated one-cycle `parsed_valid` pulses, `parsed_error = 0` |
-| Message types | `16'h001F` Modify Order and `16'h001E` Add Order |
-| Security / side | `SecurityCode = 32'h000002BC`, `Side = 8'h01` |
-| Order identity | `OrderId = 64'h1122334455667788` |
-| Price / quantity | `PriceRaw = 32'h00007A12`, `Quantity = 32'h000003E8` |
-| Book error state | `position_error = 0` |
-| Snapshot state | init done, clean, version `32'h00000001` |
-| Snapshot best offer | valid, level `6'h12`, price `32'h00007A12`, aggregate quantity `64'h00000000000003E8` |
+## Final boundary
 
-The `16'h0010 / 0` packet is the OMD-C Heartbeat form and contains no message. The held `MsgType` bus is ignored on that packet.
+The completed public build uses a custom Raw32 laboratory source and RX Buffer ON. It is not a production 10GBASE-R HKEX feed, and the separate 36–37 ns RX/TX Double-Bypass architecture is not presented as a measured result.
 
-## Closed implementation chain
-
-- Golden TX/Lab Source
-- SFP2 TX / GT X0Y6 → OM4 → SFP1 RX / GT X0Y7 Raw32 hardware integration
-- marker/alignment and continuous registered packet capture
-- fixed Message 0 parser
-- `omdc_order_state_delta`
-- 64-bit Price-Level Aggregator
-- Top-of-Book Bitmap/priority selection
-- Register Snapshot export
-- simulation
-- synthesis and implementation
-- post-route timing closure
-- bitstream/ILA hardware regression
-- final In-System IBERT Eye Scan evidence
-
-## Frozen boundary
-
-The simulator, GTH substrate, optical direction, marker/alignment, packet capture, fixed parser, order-state laboratory chain, aggregator, bitmap, and snapshot export are sealed. They are retained as the Golden hardware test source and are not the next engineering task.
-
-## Active engineering stage
-
-Development has returned to the **single-lane HKEX OMD-C Fast-Candidate path**. The immediate single-lane closure stops at the registered candidate boundary; it does not pretend that dual-line arbitration is already active. The final dual-line latency budget is:
-
-```text
-registered RX normalization: 3 cycles
-    -> fixed-slice Fast-Candidate extraction: 1 cycle
-    -> chunked one-hot A/B arbitration: 1 cycle
-    -> registered TX release: 1 cycle
-```
-
-At 322.56 MHz, six fabric cycles are approximately 18.60 ns. Together with the approximately 18 ns PMA model, the architectural target is approximately 36.6 ns. The exact result will be accepted only from the matching post-route STA, timing simulation, BER, and measured hardware configuration.
+Future engineering, if any, is private and contract-driven: a defined target board, GT/clock configuration, protocol wire format, expected outputs, test vectors, and acceptance matrix. See [COLLABORATION.md](COLLABORATION.md).
