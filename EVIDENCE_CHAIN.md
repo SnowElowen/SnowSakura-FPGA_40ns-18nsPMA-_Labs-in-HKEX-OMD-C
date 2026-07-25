@@ -15,7 +15,7 @@ This document is the final evidence index for the completed SnowSakura-FPGA publ
 | GT baseline | Raw Mode, RX Buffer ON, TX Buffer Bypass |
 | Source ownership | Golden top fabric TX source |
 | Protocol source | custom Raw32 HKEX OMD-C laboratory stream |
-| Public state | completed and frozen |
+| Public state | completed and frozen; only final `10^15`-bit BER and Eye Scan appendix remains |
 
 ## Evidence matrix
 
@@ -47,10 +47,16 @@ The Heartbeat has no MsgType. Any retained MsgType bus value is invalid when `Ms
 
 - The programmed Raw32 laboratory stream proves the stated laboratory datapath; it is not a production 10GBASE-R venue input.
 - The Eye Scan measures receiver sampling margin; it is not a substitute for a long-duration BER count.
-- The recorded BERT depth is `10^8` bits.
+- The current recorded BERT depth is `10^8` bits. A final `10^15`-bit counter record and matching Eye Scan will be appended only after the run is complete.
 - The 12.420 ns waveform covers four register intervals between five FF boundaries; it is fabric timing, not full optical latency.
 - The approximately 50 ns single-lane result belongs to the tested RX Buffer ON architecture.
 - The 36–37 ns RX/TX Double-Bypass blade is preserved only as an architecture target and is not labelled as completed hardware.
+
+## Remaining physical sign-off appendix
+
+The only planned addition to this completed repository is the final X0Y7/SFP1 physical-link record: a `10^15`-bit BER run and the corresponding Eye Scan. The appendix will publish the exact tested configuration, pattern, elapsed time, total bits, error count, and receiver plot. It is a measurement closeout, not a new RTL-development stage.
+
+Current engineering work is moving to other repositories.
 
 ## Final acceptance result
 
