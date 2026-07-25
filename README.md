@@ -5,7 +5,7 @@
 
 SnowSakura-FPGA is an independent physical-layer FPGA engineering record built on a Puzhi ZU15EG. It closes a real 10.3125 Gb/s optical laboratory path from fabric-owned TX data through GTH/SFP/OM4 reception, bounded Raw32 alignment, registered HKEX OMD-C parsing, order-state updates, price-level aggregation, top-of-book selection, and registered snapshot export.
 
-The public project is complete. Its implementation baseline and evidence are frozen; there will be no further routine public development updates. The repository remains online as a technical record and as an entry point for serious private bitstream or protocol collaboration.
+The public project is complete. Its implementation baseline and evidence are frozen; there will be no further routine public development updates. The only planned closeout addition is the final `10^15`-bit BER counter record and the corresponding Eye Scan evidence. That physical sign-off appendix will not reopen the completed RTL architecture. My active engineering focus is now moving to other repositories, while this repository remains online as a technical record and as an entry point for serious private bitstream or protocol collaboration.
 
 ## Final result at a glance
 
@@ -21,7 +21,7 @@ The public project is complete. Its implementation baseline and evidence are fro
 | Implemented timing | WNS `+0.239 ns`, WHS `+0.017 ns`, zero failing endpoints |
 | Dedicated RX boundary audit | 0 LUT levels, 0.546 ns total delay, `+0.379 ns` slack under a 0.900 ns local constraint |
 | Receiver Eye Scan | 77.78% open UI, open area 6720, configured `1e-10` dwell BER setting |
-| Recorded BERT depth | `10^8` bits |
+| Recorded BERT depth | Current public record: `10^8` bits; final `10^15`-bit run will be appended later |
 | Parser hardware state | repeated `parsed_valid`, `parsed_error = 0`, stable `align_locked = 1` |
 | Stateful output | Order State Delta → 64-bit Price-Level Aggregator → Top-of-Book → versioned Register Snapshot |
 
@@ -114,6 +114,12 @@ The registered chain closes Order State Delta, 64-bit price-level quantity accum
 The Golden source is a custom Raw32 laboratory feed. It is not described as a production HKEX 10GBASE-R Ethernet input. A real standards-coded venue feed requires an explicit 64b/66b PCS/framing path, Ethernet frame handling, IPv4/UDP normalization, and a Registered OMD-C Normalized Window before the fixed-slice candidate parser. Those blocks are not hidden inside the reported parser cycles.
 
 The Eye Scan proves receiver sampling margin for the tested optical path. The recorded BERT exercise covers `10^8` bits; it is not relabelled as a `10^15`-bit qualification. The 36–37 ns Double-Bypass design remains separate from the completed RX Buffer ON evidence.
+
+## Remaining physical sign-off appendix
+
+A final `10^15`-bit BER run and its matching Eye Scan will be added after the long-duration physical-link test is complete. The published appendix will identify the exact GT configuration, optical direction, pattern, elapsed time, tested bit count, and error count. Until that record is posted, the current public BERT depth remains `10^8` bits.
+
+This is a final measurement addition only. SnowSakura-FPGA remains completed and frozen, and current development is moving to other repositories.
 
 ## Protocol and bitstream collaboration
 
