@@ -1,670 +1,135 @@
 # SnowSakura-FPGA
 
-> # PROJECT STATUS — ARCHIVED & DISCONTINUED
->
-> **Archive date:** 2026-07-25
->
-> **Project milestone:** SnowSakura achieved a **50 ns HKEX OMD-C market-data parsing path** on the tested single-lane architecture. The evidence currently posted includes real-hardware TX ILA capture and Post-Implementation Timing Simulation of the five-stage registered fabric path: **RX ×3 + Parser ×1 + TX ×1**. Five registers contain four register-to-register intervals; the timing waveform records **12.420 ns** across those intervals at the implemented clock rate.
->
-> **Reason for discontinuation:** the next production layers—dual-line A/B arbitration, packet-loss recovery, retransmission, and FPGA Risk/Arb integration—require authentic order-book traffic and a real venue/prop-firm replay testbed. Synthetic lab vectors can prove the bounded RTL datapath, but they cannot predict or validate production loss, reordering, recovery, and replay behavior. Despite sustained interest and hundreds of unique clones, no prop firm or venue has offered the environment required to close those layers.
->
-> **Final words:** apparently sub-microsecond latency and legacy infrastructure are sufficient for the ULL finance industry. SnowSakura is therefore frozen, and I am transferring the same high-speed FPGA/PCIe networking stack into **AI Accelerators and SmartNIC development, including RoCEv2, CXL, and deterministic accelerator interconnects**.
->
-> Thanks to all the silent observers who kept cloning.
-> SnowSakura was never intended to be an HKEX-only experiment.
-> It was built to establish a reusable low-latency FPGA path across HKEX OMD-C, CME, SGX and other exchange feeds.
-> I completed the hardware, timing and parser evidence that can be completed independently. Not a single firm, venue or market participant from HKEX, CME or SGX offered even the minimum required next step: a technical conversation, anonymized replay data, expected output, or a validation environment.
+> **PROJECT STATUS — COMPLETED AND FROZEN**  
+> Final public update: **2026-07-25**
 
-Without that, there is nothing meaningful left to build. 
-More exchange-specific RTL would only be synthetic code written against synthetic assumptions. 
-The limiting factor is no longer FPGA engineering. The limiting factor is an industry that repeatedly clones the work while refusing to provide even a near-zero-cost validation opportunity.
+SnowSakura-FPGA is an independent physical-layer FPGA engineering record built on a Puzhi ZU15EG. It closes a real 10.3125 Gb/s optical laboratory path from fabric-owned TX data through GTH/SFP/OM4 reception, bounded Raw32 alignment, registered HKEX OMD-C parsing, order-state updates, price-level aggregation, top-of-book selection, and registered snapshot export.
 
-Therefore SnowSakura-HFT is frozen. No further HFT development will be published unless a real counterparty brings real data, a real test environment and a real intention to cooperate. Cloning the repository is not cooperation, and silent observation does not entitle anyone to future updates.
-> **You kept the clone graph alive; the missing testbed kept production validation dead. Goodbye.**
+The public project is complete. Its implementation baseline and evidence are frozen; there will be no further routine public development updates. The repository remains online as a technical record and as an entry point for serious private bitstream or protocol collaboration.
 
-## Final evidence currently posted
+## Final result at a glance
 
-### Hardware ILA — TX frame launch
+| Item | Final public result |
+|---|---|
+| Device | Xilinx Zynq UltraScale+ `XCZU15EG-FFVB1156-2-I` |
+| Serial link | 10.3125 Gb/s, 10G-SR optics over OM4 |
+| Proven direction | `GTHE4_CHANNEL_X0Y6 / SFP2 TX` → optics/OM4 → `SFP1 / GTHE4_CHANNEL_X0Y7 RX` |
+| GT operating baseline | GTH Raw Mode, RX Buffer ON, TX Buffer Bypass |
+| User-clock class | 322.265625 MHz hardware operating point; 322.56 MHz physical-timing target |
+| Registered fabric path | RX ×3 + Parser ×1 + TX ×1 |
+| Post-Implementation Timing Simulation | 12.420 ns across four register-to-register intervals between five FF boundaries |
+| Implemented timing | WNS `+0.239 ns`, WHS `+0.017 ns`, zero failing endpoints |
+| Dedicated RX boundary audit | 0 LUT levels, 0.546 ns total delay, `+0.379 ns` slack under a 0.900 ns local constraint |
+| Receiver Eye Scan | 77.78% open UI, open area 6720, configured `1e-10` dwell BER setting |
+| Recorded BERT depth | `10^8` bits |
+| Parser hardware state | repeated `parsed_valid`, `parsed_error = 0`, stable `align_locked = 1` |
+| Stateful output | Order State Delta → 64-bit Price-Level Aggregator → Top-of-Book → versioned Register Snapshot |
+
+The 12.420 ns value is the registered fabric interval measured in the implemented netlist simulation. It is not the complete optical wire-to-wire latency and it is not represented as one FF stage. The published single-lane architecture is approximately 50 ns with the tested RX Buffer ON baseline; the separate 36–37 ns Double-Bypass blade remains an architecture target, not a completed hardware measurement.
+
+## Golden top hardware evidence
+
+### Fabric ownership and frame launch
 
 ![Hardware ILA showing TX frame launch](img/2026-07-25_ila_tx_frame_launch.png)
 
-The hardware capture shows the registered TX source leaving the idle word, asserting the frame transaction, and presenting the first programmed word at the TX observation boundary.
+The hardware ILA shows the registered source leaving idle, asserting the frame transaction, and driving the first programmed word at the TX observation boundary. This establishes that the tested GT TXDATA path is fabric-owned by the Golden top rather than a hard PRBS generator, stale ILA image, or constant source.
 
-### Hardware ILA — complete programmed TX frame
+### Complete programmed frame
 
 ![Hardware ILA showing the complete programmed TX frame](img/2026-07-25_ila_tx_complete_frame.png)
 
-The ILA records `frame_busy = 1`, the one-cycle `frame_start` pulse, sequential word indices, and the programmed data words before the source returns to the idle pattern. This is silicon evidence that the fabric generator owns and drives the tested TX frame.
+The capture records the one-cycle `frame_start`, active `frame_busy`, sequential word indices, and all programmed words before the source returns to idle.
 
-### Post-Implementation Timing Simulation — five registered stages
+### Five registered stages after implementation
 
-![Post-Implementation Timing Simulation of the five-stage RX Parser TX path](img/2026-07-25_post_impl_rx3_parser1_tx1.png)
+![Post-Implementation Timing Simulation of RX3 Parser1 TX1](img/2026-07-25_post_impl_rx3_parser1_tx1.png)
 
-The implemented netlist simulation covers the registered **RX3 + Parser1 + TX1** path. The two cursors mark **111.588 ns** and **124.008 ns**, a delta of **12.420 ns**. This is four clock intervals between five FF boundaries; it does not mean that one FF disappeared.
+The implemented netlist simulation covers RX3 + Parser1 + TX1. The cursors at 111.588 ns and 124.008 ns show 12.420 ns across four clock intervals between five registered boundaries.
 
-
-### Implemented timing closure and RX registered-boundary audit
+### Implemented timing closure
 
 ![Implemented design timing summary](img/2026-07-25_post_impl_timing_summary.jpeg)
 
-The implemented design Timing Summary records **WNS = +0.239 ns**, **WHS = +0.017 ns**, zero failing endpoints, and all specified timing constraints met.
+![RX registered-boundary audit](img/2026-07-25_rx_registered_path_0900ns.png)
 
-![RX registered-boundary path audit under the 0.900 ns constraint](img/2026-07-25_rx_registered_path_0900ns.png)
+The timing summary records positive setup and hold slack with zero failing endpoints. The dedicated RX audit records a 0-LUT registered path whose delay is dominated by clock-to-Q and routing, not a hidden combinational mux tree.
 
-The `rxusrclk_322m` path audit shows the bounded registered RX boundary under its dedicated **0.900 ns** path requirement. The worst displayed path has **0 LUT levels**, **0.546 ns total delay** (**0.076 ns logic + 0.470 ns net**) and **+0.379 ns slack**. This is a local register-to-register constraint result, distinct from the full `rxusrclk_322m` clock period.
-
-## Final archive package
-
-Before the end of next week, this repository will receive the consolidated receiver **Eye Scan / BER record** and the final **simulated HKEX Exchange Feed Simulator** evidence package. An Eye Scan and a `10^15`-bit BER run are different measurements; the `10^15` depth will be claimed only with its counter log.
-
-For me, this project produced an enormous engineering gain: from RTL and simulation into GTHE4 data ownership, clock/reset construction, GTH Raw32 transport, real SFP/OM4 hardware, FDRE/LUT-level structure, Post-Route STA, Post-Implementation Timing Simulation, ILA evidence, OMD-C byte arithmetic, stateful order updates, price-level aggregation, and registered snapshots. The production continuation was blocked by the missing external test environment, not by an unfinished laboratory datapath.
-
-Everything below is retained as the **pre-archive historical engineering record**. References to an “active engineering stage” describe the repository state immediately before this archive notice.
-
-## Deterministic Physical-Layer FPGA Architecture for HKEX OMD-C on ZU15EG / VU9P
-
-SnowSakura-FPGA is a physical-layer FPGA project for HKEX OMD-C market-data ingestion, deterministic receive normalization, fixed-slice parsing, arbitration, and latency-controlled TX release on Xilinx UltraScale+ devices.
-
-The repository records both the active ZU15EG hardware-delivery path and the lower-latency research path. Claims are separated by evidence level: functional simulation, post-route timing, SDF timing simulation, and real hardware measurements are not treated as interchangeable.
-
-| Item | Current value |
-|---|---|
-| Primary device | Xilinx Zynq UltraScale+ `XCZU15EG-FFVB1156-2-I` |
-| Secondary research device | Virtex UltraScale+ VU9P |
-| Serial line rate | 10.3125 Gb/s |
-| Fabric timing target | 322.56 MHz over-constraint / 322.265625 MHz standard operating point |
-| Active transceiver path | GTH Raw Mode / RX Buffer ON / TX Buffer Bypass |
-| Active hardware state | HKEX OMD-C Exchange Feed Simulator and downstream authoritative book/aggregation laboratory chain completed and sealed |
-| Active engineering stage | Single-lane 36–37 ns Fast-Candidate path |
-| Research transceiver path | GTH Raw Mode / RX-TX Buffer Bypass |
-| Research latency target | 36–37 ns, six registered fabric stages plus the measured/modelled PMA contribution |
-
-> **Current state:** the real SFP2-to-SFP1 GTH/optical path, PRBS31 closure, Eye Scan, Raw32 alignment, registered packet capture, continuous multi-packet fixed-Message-0 parsing, Order State Delta processing, 64-bit Price-Level aggregation, Top-of-Book Bitmap/priority selection, and Register Snapshot export are complete and frozen. The Exchange Feed Simulator is sealed as the Golden hardware test source. Active engineering has returned to the single-lane 36–37 ns Fast-Candidate path.
-
----
-
-## Contents
-- [Current Hardware Status](#current-hardware-status--2026-07-24--exchange-simulator-completed-and-sealed)
-- [Current Progress](CURRENT_PROGRESS.md)
-- [Evidence Chain and Final Acceptance Matrix](EVIDENCE_CHAIN.md)
-- [Immediate Hardware Checklist](#immediate-hardware-checklist)
-- [HKEX OMD-C Exchange Feed Simulator](#hkex-omd-c-exchange-feed-simulator)
-- [Architecture Tracks](#architecture-tracks)
-- [Fast-Path Engineering Rules](#fast-path-engineering-rules)
-- [Verification Contract](#verification-contract)
-- [Historical Engineering Log](#historical-engineering-log)
-- [Public / Private Boundary](#public--private-boundary)
-- [Collaboration](#collaboration)
-
----
-
-## Current Hardware Status — 2026-07-24 — EXCHANGE SIMULATOR COMPLETED AND SEALED
-
-SnowSakura has completed and frozen the **golden single-direction HKEX OMD-C Exchange Feed Simulator and downstream authoritative book/aggregation laboratory chain** on the real Puzhi ZU15EG optical path. The proven physical direction is SFP2 / GT X0Y6 TX → 10G-SR optics → OM4 → SFP1 / GT X0Y7 RX, with fabric-owned Raw32 data above the closed GTH substrate.
-
-The completed system covers deterministic lab-frame generation, stable marker/alignment lock, continuous registered packet capture, fixed Message 0 parsing across repeated OMD-C packet forms, order-state delta generation, price-level quantity accumulation, top-of-book selection, and a registered snapshot export. The result has passed the corresponding simulation, synthesis, implementation, post-route timing, bitstream/ILA, and hardware regression chain. This is real optical-path hardware closure, not a simulation-only milestone.
-
-### Hardware Eye Scan — receiver sampling margin
-![Continuous multi-packet OMD-C parser hardware closure](img/2026-07-23_continuous_multi_packet_parser.png)
-![IBERT Eye Scan with 77.78 percent open UI](img/2026-07-23_ibert_eye_scan_open_ui_77_78.png)
-
-This is the real transmitter-to-receiver pin path:
-
-```text
-GTHE4_CHANNEL_X0Y6 TX pins / SFP2
-    -> 10G-SR transmitter optics
-    -> OM4 fibre
-    -> SFP1 receiver optics
-    -> GTHE4_CHANNEL_X0Y7 RX pins
-    -> X0Y7 RX sampler / In-System IBERT Eye Scan
-```
-
-The contour is generated by the `X0Y7` receiver sampler while receiving the stream launched from the `X0Y6` TX pins. It is therefore an RX view of the complete physical TX-to-RX link, not a TX-only plot or a fabric waveform. The final completed scan reports:
-
-| Metric | Measured result |
-|---|---:|
-| Open area | 6720 |
-| Open UI | 77.78% |
-| Horizontal scan range | -0.500 UI to +0.500 UI |
-| Vertical scan range | 100% |
-| Horizontal / vertical increment | 8 / 8 |
-| Dwell BER setting | 1e-10 |
-| Scan interval | 2026-07-23 23:49:10 to 2026-07-24 00:00:31 |
-
-This closes the earlier non-responsive Eye Scan execution fault domain and records the receiver sampling margin of the tested complete optical path.
-
-### Hardware packet capture and field reconstruction
-
-![Locked 12-word capture with OMD-C parser fields](img/2026-07-23_rx_capture_parser_fields.png)
-
-The RX-domain ILA records align_locked = 1 while the capture index advances through the fixed packet window. The parser reconstructs MsgType = 16'h001E, OrderId = 64'h1122334455667788, PriceRaw = 32'h00007A12, and Quantity = 32'h000003E8 directly from the received hardware stream.
-
-### Hardware valid-chain closure
-
-![Packet-valid to parsed-valid hardware closure](img/2026-07-23_packet_valid_parsed_valid.png)
-
-The ILA records capture_index = 0...11, followed by a one-cycle packet_valid pulse and then a one-cycle parsed_valid pulse. parsed_error remains Low, align_locked remains High, and the packet counter increments. This is the physical closure of marker/alignment → 12-word capture → fixed Message 0 parser for the current lab vector.
-
-### Continuous multi-packet parser closure
-
-The RX-domain ILA proves continuous operation rather than a single accepted vector:
-
-| Hardware signal | Observed result |
-|---|---|
-| `align_locked` | continuously `1` |
-| `parsed_valid` | repeated one-cycle output pulses |
-| `parsed_error` | continuously `0` |
-| `PktSize / MsgCount` | `16'h004C / 2`, `16'h0010 / 0`, `16'h0030 / 1` |
-| Accepted `MsgType` | `16'h001F` Modify Order and `16'h001E` Add Order |
-| `OrderId` | `64'h1122334455667788` |
-| `PriceRaw` | `32'h00007A12` |
-| `Quantity` | `32'h000003E8` |
-| `SendTime` | `64'h1122334455667788` |
-
-`PktSize = 16'h0010` with `MsgCount = 0` is the OMD-C Heartbeat packet form. It contains no message; the held `MsgType` bus is ignored for that packet. The `16'h004C` packet carries two complete test messages and the `16'h0030` packet carries one, proving repeated packet-header reconstruction and registered fixed-Message-0 output across the programmed stream.
-
-### Downstream order-book and snapshot hardware closure
-
-![Exchange simulator parser-to-book hardware closure](img/2026-07-23_exchange_simulator_book_closure.png)
-
-![Top-of-book and register snapshot evidence](img/2026-07-23_exchange_simulator_snapshot_closure.png)
-
-The final RX-domain ILA capture proves that the completed parser stream drives the downstream stateful laboratory chain without reopening the frozen GTH or alignment layers:
-
-| Hardware boundary | Observed result |
-|---|---|
-| Parser stream | repeated `parsed_valid` pulses with alternating `MsgType = 16'h001E / 16'h001F` |
-| Security / side | `SecurityCode = 32'h000002BC`, `Side = 8'h01` |
-| Alignment | `align_locked = 1` |
-| Order-book error state | `position_error = 0` |
-| Snapshot state | `snapshot_init_done = 1`, `snapshot_dirty = 0`, `snapshot_version = 32'h00000001` |
-| Current best offer | valid, level index `6'h12` |
-| Snapshot best offer | valid, level index `6'h12`, price `32'h00007A12`, aggregate quantity `64'h00000000000003E8` |
-| Current / snapshot bid | invalid for the programmed offer-side state |
-
-The completed downstream blocks are `omdc_order_state_delta`, the 64-bit Price-Level Aggregator, Top-of-Book Bitmap/priority selection, and Register Snapshot export. Their laboratory purpose is to validate authoritative state evolution from the Golden OMD-C feed; these blocks are now sealed with the simulator and are not the next development stage.
-
-### Completed and sealed hardware boundary
+## Complete physical and protocol chain
 
 ~~~text
-Golden TX / Lab Source
-    -> GTH TX / SFP2
+snow_gth_golden_top / Golden fabric source
+    -> GTHE4_CHANNEL_X0Y6 TX pins / SFP2
     -> 10G-SR optics / OM4
-    -> SFP1 / GTH RX
-    -> stable Raw32 marker alignment
-    -> continuous registered packet capture
-    -> repeated OMD-C Packet Header reconstruction
-    -> fixed Message 0 Add / Modify parsing
-    -> repeated parsed_valid pulses, parsed_error = 0
-    -> Order State Delta
-    -> 64-bit Price-Level Aggregator
-    -> Top-of-Book Bitmap / priority selection
-    -> Register Snapshot export
-~~~
-
-The measured BER/BERT sample depth for this frozen build is **10^8 bits**.
-
-The HKEX OMD-C Exchange Feed Simulator and its downstream authoritative book/aggregation laboratory chain are completed, sealed, and retained as the reusable Golden hardware test source. Active development has returned to the single-lane 36–37 ns Fast-Candidate path; the completed simulator, GTH substrate, optics, marker/alignment, packet capture, fixed parser, book chain, bitmap, and snapshot export are not reopened.
-
-No production RTL, GT integration recipe, internal status-bit encoding, board-routing detail, XDC/TCL constraint, or calibration script is published by this update.
-
----
-
-## Immediate Hardware Checklist
-
-Acceptance is intentionally ordered. A later protocol check cannot compensate for an unproven earlier physical boundary.
-
-### Program image and debug identity
-
-- [x] Acquire the ZU15EG board and optical test setup
-- [x] Incorporate the active Puzhi board mappings
-- [x] Build the reusable GT hardware shell
-- [x] Program an exact known bitstream
-- [x] Refresh and match the corresponding ILA probe set
-
-### GT initialization and clocks
-
-- [x] Prove the freerun/reset-helper clock is active
-- [x] Prove a continuous MGT reference clock at the selected GT boundary
-- [x] Prove `gtpowergood`
-- [x] Prove QPLL0 lock and reference-clock selection
-- [x] Prove TX/RX PMA reset completion
-- [x] Prove `tx_reset_done` and `rx_reset_done`
-- [x] Prove RX CDR stability
-- [x] Observe active TXUSRCLK2 and RXUSRCLK2 domains in hardware
-- [ ] Verify generated clock periods with `report_clocks`
-
-### Physical data movement
-
-- [x] Show changing TX words in the intended TX user-clock domain
-- [x] Prove the selected SFP/lane/loopback route
-- [x] Show changing raw RX words on the intended lane
-- [x] Pass the GT-internal PRBS31 checker
-- [x] Prove PRBS31 lock in the intended optical RX lane
-- [x] Reach the clean quick-qualification state
-- [x] Close PRBS selector and checker-reset startup ambiguity
-- [x] Select RX polarity from the PRBS checker result
-
-### OMD-C hardware path
-
-- [x] Deliver live RX words to the parser observation boundary
-- [x] Transmit the fixed 48-byte OMD-C payload sequence from the fabric feed model
-- [x] Prove TX word-index and state progression in hardware
-- [x] Prove stable bounded marker/alignment lock with `align_locked = 1`
-- [x] Prove registered `capture_index = 0...11` progression
-- [x] Prove one-cycle `packet_valid` after the 12-word capture
-- [x] Reconstruct Little-Endian `MsgType` as `16'h001E`
-- [x] Assert one-cycle `parsed_valid` with `parsed_error = 0`
-- [x] Reconstruct the programmed Add Order fields in hardware
-- [x] Prove continuous `PktSize / MsgCount` rotation across two-message, Heartbeat, and one-message packet forms
-- [x] Prove repeated fixed-Message-0 outputs for `MsgType = 16'h001F` and `16'h001E`
-- [x] Close `omdc_order_state_delta`: Add / Modify / Delete in isolated RTL simulation, with the programmed Add / Modify stream in hardware regression
-- [x] Close the 64-bit Price-Level Aggregator
-- [x] Close Top-of-Book Bitmap/priority selection
-- [x] Close Register Snapshot export with registered version/state
-- [x] Seal the Exchange Feed Simulator as the Golden hardware test source
-
-### Evidence and measurement
-
-- [x] Post-route STA for the active RX Buffer ON exchange-feed build
-- [x] Real-hardware Eye Scan on the X0Y6-TX-to-X0Y7-RX optical path: open area 6720 and open UI 77.78% at the 1e-10 dwell BER setting
-- [x] Current BER/BERT sample-depth exercise: 10^8 bits
-- [x] Continuous hardware valid-chain proof: alignment → capture → packet valid → parsed valid
-- [ ] Post-implementation SDF timing simulation
-- [ ] Final long-duration BER qualification
-- [ ] Measured Version 2 wire-to-wire latency report
-- [ ] Version 1 RX Buffer Bypass re-validation
-- [ ] Dual-line A/B arbitration validation
-
----
-
-## HKEX OMD-C Exchange Feed Simulator
-
-The custom exchange feed simulator is a deterministic FPGA-side hardware test source. It is not a software packet replay and does not claim to recreate the complete HKEX exchange network.
-
-Its purpose is narrower and physically testable: generate known OMD-C bytes, send them through the real GTH TX/SFP path, receive them through the selected GTH RX lane, and expose each boundary before parser output is accepted.
-
-### Hardware chain
-
-```text
-omdc_packet_rom
-    -> tx_feed_fsm
-    -> GTH TX / SFP
-    -> optical or board loopback
-    -> GTH RX Buffer ON
-    -> RX capture / pattern checker
-    -> fixed-slice OMD-C parser
+    -> SFP1 / GTHE4_CHANNEL_X0Y7 RX pins
+    -> RX sampler and Raw32 registered capture
+    -> bounded marker/alignment
+    -> continuous 12 x 32-bit packet capture
+    -> fixed Message 0 OMD-C parser
     -> omdc_order_state_delta
     -> 64-bit Price-Level Aggregator
     -> Top-of-Book Bitmap / priority selection
-    -> Register Snapshot export
-```
+    -> versioned Register Snapshot export
+~~~
 
-| Block | Physical role | Required evidence |
-|---|---|---|
-| `omdc_packet_rom` | Stores deterministic OMD-C test bytes | Byte-for-byte reference vector |
-| `tx_feed_fsm` | Releases ROM words in the TX user-clock domain | Word index, start, completion |
-| GTH TX / SFP | Sends the real 10.3125 Gb/s serial stream with TX Buffer Bypass | Reset status, TX clock, TX activity |
-| Loopback path | Returns the stream to the selected RX lane | Proven port and lane mapping |
-| GTH RX Buffer ON | Provides the active stable receive baseline | RX reset done, CDR state, RX clock |
-| RX capture/checker | Registers RX words and checks movement before parsing | Raw activity, match flag, mismatch count |
-| Fixed-slice parser | Extracts protocol fields after boundary proof | Payload progression and parsed fields |
-| Order State Delta | Converts Add / Modify / Delete state transitions into registered signed quantity changes | Delta/result pulses and underflow/overflow checks |
-| 64-bit Price-Level Aggregator | Applies signed deltas to bounded price-level quantities | Registered level result and quantity |
-| Top-of-Book Bitmap | Selects the first valid bid/offer level using bounded priority logic | Best-level valid/index |
-| Register Snapshot | Exports a versioned registered view of the current book | Init, dirty, valid, version, price, quantity |
+### Receiver and parser evidence
 
-### Level-1 deterministic payload
+![IBERT Eye Scan](img/2026-07-23_ibert_eye_scan_open_ui_77_78.png)
 
-The first protocol vector is deliberately fixed and small:
+![RX capture and parser fields](img/2026-07-23_rx_capture_parser_fields.png)
 
-| Region | Size | Purpose |
+![Packet valid to parsed valid](img/2026-07-23_packet_valid_parsed_valid.png)
+
+![Continuous multi-packet parser](img/2026-07-23_continuous_multi_packet_parser.png)
+
+The hardware stream rotates through the following packet forms:
+
+| Packet form | `PktSize / MsgCount` | Observed parser behavior |
 |---|---:|---|
-| OMD-C Packet Header | 16 bytes | `PktSize`, `MsgCount`, `SeqNum`, `SendTime` |
-| Add Order | 32 bytes | FullTick Add Order with `MsgType = 30` |
-| Total payload | 48 bytes | One packet containing one complete message |
+| Packed Add + Modify | `16'h004C / 2` | fixed Message 0 output with repeated registered valid pulses |
+| Heartbeat | `16'h0010 / 0` | no message; held MsgType bus is ignored |
+| Add Order | `16'h0030 / 1` | `MsgType = 16'h001E` |
 
-OMD-C integer fields are Little-Endian. `MsgType = 30` appears on the byte stream as `1E 00`; the parser must reconstruct it as `16'h001E`.
+Observed reconstructed fields include `OrderId = 64'h1122334455667788`, `PriceRaw = 32'h00007A12`, and `Quantity = 32'h000003E8`. `align_locked` remains asserted while `parsed_valid` repeats and `parsed_error` remains Low.
 
-### Staged test plan
+### Stateful book and snapshot evidence
 
-1. **Level 0 — GT link and training pattern: completed**  
-   Clocks, resets, QPLL/CDR state, selected optical direction, GT-internal PRBS31 lock, checker startup, and RX polarity are closed for the frozen base.
+![Parser to book closure](img/2026-07-23_exchange_simulator_book_closure.png)
 
-2. **Level 1 — Fixed 48-byte OMD-C payload: completed**  
-   Fabric TX progression, stable marker alignment, 12 × 32-bit capture, packet completion, `MsgType = 16'h001E`, Add Order field reconstruction, and the packet-valid-to-parser-valid chain are proven in hardware.
+![Top of book and snapshot](img/2026-07-23_exchange_simulator_snapshot_closure.png)
 
-3. **Level 2 — authoritative book/aggregation laboratory chain: completed**
-   The Order State Delta engine, 64-bit Price-Level Aggregator, Top-of-Book Bitmap/priority selection, and Register Snapshot export are closed through simulation, implementation, post-route timing, and real-hardware ILA regression.
+The registered chain closes Order State Delta, 64-bit price-level quantity accumulation, bitmap-based best-level selection, and coherent snapshot export. The recorded offer-side state is level `6'h12`, price `32'h00007A12`, aggregate quantity `64'h00000000000003E8`, snapshot version `32'h00000001`, with `position_error = 0`.
 
-4. **Production 10GBASE-R normalization: separate later stage**
-   Ethernet PCS/framing, IPv4/UDP normalization, and a Registered OMD-C Normalized Window are not inserted into this custom Raw32 laboratory source. They begin only when the project switches to a standards-coded external feed.
+## What this repository proves
 
-5. **Measurement status**
-   Routed timing and the real-hardware Eye Scan are complete. The current BER/BERT depth is 10^8 bits; SDF, final long-duration BER, and measured board latency remain later sign-off items.
+- Real GT/SFP/OM4 data movement on the stated ZU15EG lane direction.
+- Fabric ownership of the transmitted programmed frame.
+- Stable Raw32 capture and bounded marker/alignment in the tested custom laboratory stream.
+- Correct Little-Endian reconstruction for the published OMD-C packet forms and fixed Message 0 fields.
+- Registered valid/error behavior through parser, state, aggregation, top-of-book, and snapshot boundaries.
+- Synthesis, implementation, post-route STA, Post-Implementation Timing Simulation, ILA regression, and receiver Eye Scan evidence for the matching public build.
 
----
+## Evidence boundary
 
-## Architecture Tracks
+The Golden source is a custom Raw32 laboratory feed. It is not described as a production HKEX 10GBASE-R Ethernet input. A real standards-coded venue feed requires an explicit 64b/66b PCS/framing path, Ethernet frame handling, IPv4/UDP normalization, and a Registered OMD-C Normalized Window before the fixed-slice candidate parser. Those blocks are not hidden inside the reported parser cycles.
 
-### Version 2 — Stable Hardware Delivery Baseline
+The Eye Scan proves receiver sampling margin for the tested optical path. The recorded BERT exercise covers `10^8` bits; it is not relabelled as a `10^15`-bit qualification. The 36–37 ns Double-Bypass design remains separate from the completed RX Buffer ON evidence.
 
-Version 2 is the current implementation path for the first reproducible ZU15EG hardware deliverable.
+## Protocol and bitstream collaboration
 
-| Stage | Physical contract | Evidence target |
-|---|---|---|
-| GTH RX Buffer ON | Use the RX elastic buffer during stable board bring-up | `rx_reset_done`, CDR stability, clean RX capture |
-| GTH Raw Mode | Keep ownership close to the transceiver instead of a vendor MAC/AXI datapath | GT configuration and user-clock reports |
-| TX Buffer Bypass | Keep the TX latency source controlled | TX reset done, TX activity, loopback |
-| Buffered RX capture | Capture stable GT output into FDREs in RXUSRCLK2 | Post-route timing and SDF simulation |
-| Pattern checker | Prove data movement before protocol claims | Sticky match and mismatch counters |
-| Fixed OMD-C ROM | Provide deterministic hardware traffic | Repeatable byte sequence |
-| Fixed-slice parser | Extract only fixed-position fields | No runtime barrel shifter; routed timing proof |
-| Latency measurement | Include GT and buffer latency explicitly | Measured sub-60 ns target |
+This architecture is not tied to HKEX OMD-C. I can adapt the physical receive path, framing/normalization boundary, fixed-field parser, registered state pipeline, and deterministic TX release to other exchange feeds, Ethernet-derived transports, or proprietary binary protocols when the wire format, line coding, target FPGA, lane map, reference clock, and output contract are defined.
 
-RX Buffer latency is treated as configuration-dependent. It will be reported from the actual GT Wizard configuration and hardware measurement rather than assumed as a marketing constant.
+For a concrete collaboration, I am willing to provide private board-specific `.bit` and matching `.ltx` packages, protocol-specific builds, hardware bring-up support, and evidence-driven latency/timing closure. Private production RTL, GT integration details, XDC/Tcl physical constraints, calibration logic, and board-specific implementation files are not released publicly by default.
 
-### Version 1 — 36–37 ns Deterministic Low-Latency Research Blade
+See [COLLABORATION.md](COLLABORATION.md) for the required technical contract.
 
-Version 1 preserves the RX/TX Buffer Bypass direction as the active 36–37 ns research target.
+**Contact:** `ruansheng333@gmail.com`  
+**GitHub:** [SnowElowen](https://github.com/SnowElowen)
 
-| Stage | Budget | Physical meaning |
-|---|---:|---|
-| RX normalization | 3 cycles | Alignment-owned registered valid/data handoff into a fixed parser interface |
-| Fast-Candidate extraction | 1 cycle | Fixed-offset field extraction without a runtime barrel shifter |
-| Chunked A/B arbitration | 1 cycle | Replicated one-hot payload selection with pre-registered control |
-| TX release | 1 cycle | Pre-registered template/control release |
-| PMA model | approximately 18 ns | Explicit transceiver contribution under the bypass model |
+## Final repository map
 
-At 322.56 MHz, one fabric cycle is approximately 3.1004 ns. Six listed fabric cycles are approximately 18.60 ns; combined with the approximately 18 ns PMA model, the architectural target is approximately 36.6 ns. The target remains tied to post-route STA, timing simulation, BER evidence, and measured hardware latency for the exact bypass configuration.
+- [CURRENT_PROGRESS.md](CURRENT_PROGRESS.md) — final completed state
+- [EVIDENCE_CHAIN.md](EVIDENCE_CHAIN.md) — evidence matrix and claim boundaries
+- [COLLABORATION.md](COLLABORATION.md) — private bitstream and custom-protocol cooperation
 
-Version 1 requires phase-related clock proof, manual alignment, buffer-bypass done/error validation, post-route STA, timing simulation, BER evidence, and measured hardware latency before it becomes a deliverable claim.
-
----
-
-## Fast-Path Engineering Rules
-
-1. **No runtime barrel shifter in the steady-state RX path.**  
-   A dynamic part-select maps to a mux network, not a metal wire.
-
-2. **No wide alignment scanner in the accepted steady-state path.**  
-   A scanner may assist bring-up, but the locked parser interface must be fixed.
-
-3. **No Async FIFO in the latency-critical path.**  
-   The final path must be same-domain or demonstrably phase-related. Buffering used by Version 2 must be counted explicitly.
-
-4. **Triple-FF applies only to single-bit asynchronous controls or status.**  
-   Triple-FF does not make a changing multi-bit payload coherent. Payload must remain in one domain, use a proven phase relationship, or cross through an explicitly designed coherency mechanism outside the critical path.
-
-5. **GTH RX Data Path combinational depth is limited to two LUT levels.**  
-   The limit is accepted only when confirmed after implementation.
-
-6. **No uncontrolled fanout.**  
-   Parser valid, arbitration select, packet valid, and TX release controls must be localized or replicated when routed fanout threatens the 3.1004 ns period.
-
-7. **No hidden latency source.**  
-   Vendor MAC, AXI, FIFO, PCS buffering, and GT buffering must be named and counted when present.
-
-8. **No parser debugging before the RX stream is proven.**  
-   Constant or invalid GT output is a clock/reset/link problem until raw RX movement is demonstrated.
-
-9. **No latency claim from functional simulation alone.**  
-   Timing and board behavior require routed and physical evidence.
-
----
-
-## Verification Contract
-
-| Evidence | What it proves | What it does not prove |
-|---|---|---|
-| RTL simulation | Functional state and field-extraction behavior | Routed delay, GT behavior, BER |
-| Stress test | Behavior under the modeled jitter/phase assumptions | Real PMA/CDR/board behavior |
-| Post-route STA | Setup/hold timing for constrained implemented paths | Packet correctness or analog link quality |
-| SDF timing simulation | Netlist behavior with annotated routed delays | Real optical channel BER |
-| `report_clocks` | Actual generated clock objects and relationships | Data correctness by itself |
-| ILA capture | Internal hardware state at sampled boundaries | Unsampled analog eye quality |
-| Eye Scan | Receiver sampling margin under the tested setup | Long-duration error rate by itself |
-| BER run | Error statistics over the measured bit count | Untested environmental conditions |
-| Latency measurement | Actual boundary-to-boundary delay for the measured configuration | A different GT/buffer configuration |
-
-Required implementation review includes WNS, WHS, failing endpoints, logic levels, route delay, high-fanout nets, clock interaction, exceptions, SDF timing, and the exact endpoints covered by each constraint.
-
----
-
-## Historical Engineering Log
-
-Earlier figures and metrics are preserved as development evidence. They describe the build in which they were captured; they are not automatically proof of the current RX Buffer ON hardware configuration.
-
-### 2026-03-18 — Initial ZU15EG Physical Timing Work
-
-#### Datapath routing and net-delay suppression
-
-![data](img/s1_routing.jpg)
-
-Representative paths pushed logic delay below approximately 1 ns, while net delay near 1.5 ns became the dominant problem. The physical lesson was that simple RTL still fails when placement creates long routes through switch matrices and interconnect tiles.
-
-#### Floorplanning and initial timing closure
-
-![Data_Path_Logic](img/s2_floorplan.jpg)
-
-- WNS: +0.708 ns
-- WHS: +0.024 ns
-- Failing endpoints: 0
-
-#### Full pipeline squeeze at 322 MHz class
-
-![Timing_Summary](img/s3_timing.jpg)
-
-![Clock_Tree](img/4ltigoriena_sim1.png)
-
-- WNS: +0.472 ns
-- WHS: +0.030 ns
-- Failing endpoints: 0 across 542 endpoints
-
-This phase established that clock trees, register placement, routing detours, and fanout must be reviewed together.
-
-### 2026-04-29 — RX / Parser / TX Single-Channel Validation
-
-![Physical_Mapping](img/enasim4x2_.png)
-
-The waveform work examined deterministic cycle behavior from Start-of-Packet detection into parser output signaling under the tested Raw Mode assumptions.
-
-![Manual_Routing](img/朽木冬子_5.png)
-
-The synthesis schematic was used to inspect FDRE ownership, LUT depth, routing locality, and whether debug outputs distorted the fast path. A schematic shows topology; routed timing and hardware measurement are still required for latency proof.
-
-Reported results from the tested implementation:
-
-- WNS: +0.472 ns
-- WHS: +0.030 ns
-- Failing endpoints: 0 across 542 endpoints
-
-### VU9P Matrix Scaling and SLR Isolation
-
-Representative reported metrics:
-
-- WNS: +2.011 ns
-- WHS: +0.159 ns
-- Net Delay: 0.760 ns
-- Logic Delay: 0.217 ns
-
-![Output_Waveform](img/tkyou_6.png)
-
-![rooting](img/shio_7.png)
-
-The scaling study exposed SLR distance and control fanout as physical routing costs. Critical fanout above approximately 12 became a review trigger, with register replication preferred over a global control driving a wide mux field.
-
-#### Placement and routing evidence
-
-![new_art](img/utou_8.png)
-
-![new_art](img/yuki_9.png)
-
-These images remain useful placement records, but a clean Device View is not independent timing proof.
-
-#### Simulation snapshots
-
-![SIM](img/10sim2_1.png)
-
-![SIM](img/11sim2_2.png)
-
-Simulation exposed functional and pipeline behavior. Later work tightened the distinction between parser success and GTH/CDC/board proof.
-
-### 2026-05-15 — First Public Simulation Release
-
-![Overview](img/over1.png)
-
-![Python_Sim_1](img/pythonsim2.png)
-
-![Python_Sim_2](img/pythonsim2_2.png)
-
-The project moved from isolated timing experiments toward a broader IEEE 802.3 / OMD-C simulation framework. Historical packet capture increased from approximately 10% to 71.3%, exposing parser-state and validity failures that required further correction.
-
-Frank Bruno's high-speed serial-interface material was an important external influence during this stage.
-
-#### 9,974 / 10,202 stress-test milestone
-
-![Vivado_Sim_1](img/12sim3_.png)
-
-The public stress test reached 9,974 of 10,202 captures, approximately 97.8%, under the simulation assumptions at that time. It explored ppm offset, ps-scale jitter, sub-ns phase perturbations, and raw-data ingestion.
-
-![Vivado_Sim_2](img/13sim3_2.png)
-
-![Vivado_Sim_3](img/14sim3_3.png)
-
-```text
-/sim/tb_omdc_top.v : physical-layer-oriented testbench
-/sim/raw_data.hex  : HKEX OMD-C raw stream test dataset
-```
-
-#### Routing geometry studies
-
-![Vivado_routing1](img/routing1.png)
-
-![Vivado_routing2](img/routing2.png)
-
-Short Manhattan distance and fewer switchbox hops can reduce route delay, but visual route shape must be tied to implemented timing reports.
-
-### 2026-05-18 — 10,000 / 10,000 Simulation Milestone
-
-![tcl](img/tclover2.png)
-
-The first major simulation target reached 10,000 of 10,000 packet ingestions without adding a pipeline cycle to that simulation architecture.
-
-The correction that remains active today is important: a selected path reporting one or zero logic levels is not full-system proof. Endpoint coverage, route delay, fanout, setup/hold, clocks, and hardware behavior still matter.
-
-Reported metrics from that tested implementation included:
-
-- WNS: +0.593 ns on selected critical control paths
-- Total Logic Delay: approximately 0.176 ns on selected paths
-
-![device](img/device1.png)
-
-![pysim3](img/pysim3.png)
-
-### 2026-06-24 — Deterministic Research Architecture
-
-The research architecture converged on explicit RX normalization, fixed-slice parsing, bounded arbitration, TX release, and an explicitly counted PMA model. The verification environment also became stricter about RX ownership, legal bit windows, multi-clock behavior, and post-implementation timing.
-
-The architectural lessons retained from this phase are:
-
-- OMD-C packet ordering is not Ethernet bit/block alignment.
-- Dynamic offsets create mux networks and are not fixed metal routes.
-- A multi-bit CDC bus cannot be repaired with independent synchronizers.
-- A fixed-cycle pipeline must be stated in cycles and ns.
-- Physical constraints are part of the design and missing objects must fail loudly.
-
-### 2026-07-03 — Real Hardware Phase
-
-![FPGA](img/FPGA.jpg)
-
-The ZU15EG board and 10G optical test setup moved SnowSakura from architecture and simulation work into real GTH/SFP validation.
-
-The hardware program covers board bring-up, Raw Mode, RX Buffer ON, TX Buffer Bypass, clocks and resets, pattern checking, deterministic OMD-C ROM traffic, post-route STA, timing simulation, Eye Scan, BER, and measured latency.
-
-### 2026-07-07 — RX Buffer ON Delivery Baseline
-
-Extended bring-up exposed the sensitivity of RX Buffer Bypass to RXUSRCLK2/RXPROGDIVCLK construction, reset sequencing, phase alignment, bypass status, and debug observability.
-
-The repository was therefore split into two tracks:
-
-- Version 2 proves stable real-hardware packet movement and measured latency with RX Buffer ON.
-- Version 1 preserves RX Buffer Bypass for the 36–37 ns deterministic research path after the baseline is established.
-
-### 2026-07-13 — From `0x1F` Initialization to Live Optical RX Data
-
-The day began with reference-clock validation and a corrected GT integration moving the live board beyond the earlier reset-boundary condition. The routed design generated a fresh bitstream, and the dedicated bring-up status first reached `16'h001F` in ILA.
-
-![Earlier 0x1F initialization boundary](img/0x1f_ila.png)
-
-Later hardware captures crossed that boundary: TX became active through the selected optical loopback, RX produced changing 32-bit fabric words, and the PRBS/training observer advanced. The parser observation boundary is now driven by live hardware traffic rather than a frozen status value.
-
-This closes the physical-link/no-data fault domain for the current bring-up image. The next public milestone is deterministic frame and protocol acceptance: stable training lock, fixed 48-byte OMD-C transfer, Little-Endian `MsgType = 16'h001E`, followed by BER and measured latency evidence.
-
-The public evidence records the state transition and acceptance order only; source RTL, integration scripts, status-bus encoding, calibration logic, and physical placement details remain private.
-
-### 2026-07-14 — GTH Physical Layer Closed with Internal PRBS31 BERT
-
-The final bring-up day converted the July 13 live-data milestone into a protocol-independent serial-link proof. GT-internal PRBS31 was enabled across the real SFP2-to-SFP1 optical route so that fabric word boundaries, training markers, packet capture, parser state, and OMD-C formatting could no longer contaminate the diagnosis.
-
-The remaining variables were removed in a controlled order: the known-good MGT reference and QPLL0 route were preserved, RX polarity was tested by checker outcome, PRBS selection was applied without lane-slice ambiguity, and the RX checker received an explicit post-reset counter-reset session. The receive side then reached CDR lock, PRBS lock, and the clean quick-qualification state recorded in the final ILA capture.
-
-This closes the GTH bring-up phase for the active RX Buffer ON / TX Buffer Bypass baseline. SnowSakura now moves from transceiver diagnosis to deterministic OMD-C framing and fixed-slice parser acceptance.
-
-### 2026-07-16 — Fabric TX/RX Exchange-Feed Milestone
-
-The project returned from the frozen PRBS diagnostic image to normal fabric-owned data. Hardware ILA captures showed deterministic TX word/state progression, live Raw32 RX activity across the proven SFP2-to-SFP1 optical path, and an implemented timing summary with WNS `+0.452 ns`, WHS `+0.013 ns`, and zero failing endpoints.
-
-At that historical checkpoint marker/frame acceptance had not asserted and the parsed OMD-C fields remained zero. The failure was isolated above the frozen GTH substrate and was subsequently closed by the July 23 laboratory-base build.
-
-### 2026-07-23/24 — HKEX OMD-C Exchange Feed Simulator and Authoritative Book Lab Chain Completed
-
-The completed build proves stable `align_locked = 1`, deterministic packet capture, repeated one-cycle `parsed_valid` pulses, and `parsed_error = 0` across a continuous programmed stream. Hardware rotates through `PktSize / MsgCount = 16'h004C / 2`, `16'h0010 / 0`, and `16'h0030 / 1`; the fixed Message 0 parser outputs `MsgType = 16'h001F` and `16'h001E` while preserving `OrderId = 64'h1122334455667788`, `PriceRaw = 32'h00007A12`, and `Quantity = 32'h000003E8`.
-
-A real In-System IBERT Eye Scan at the `X0Y7` RX sampler, receiving the complete `X0Y6 TX pins → SFP2 optics → OM4 → SFP1 optics → X0Y7 RX pins` path, reports open area 6720 and open UI 77.78% at the 1e-10 dwell BER setting. The current BER/BERT test depth is 10^8 bits, while long-duration BER, SDF, wire-to-wire latency, production 10GBASE-R normalization, and dual-line arbitration remain separate later stages.
-
-The downstream hardware regression then closes `omdc_order_state_delta`, the 64-bit Price-Level Aggregator, Top-of-Book Bitmap/priority selection, and Register Snapshot export. Simulation, synthesis, implementation, post-route timing, bitstream/ILA, and hardware evidence now form one completed chain.
-
-This completes and seals the HKEX OMD-C Exchange Feed Simulator and authoritative book/aggregation laboratory chain as the reusable SnowSakura Golden hardware source. The active engineering stage has returned to the single-lane 36–37 ns Fast-Candidate path.
-
-### Built From Almost Nothing
-
-SnowSakura was not built inside a university laboratory, research group, or company hardware team. Its starting environment was one laptop, one desk lamp, one pen, public documentation, repeated engineering iteration, and one GPT.
-
-![lab](img/mylab.jpeg)
-
-The repository records the learning process from RTL and simulation through FDRE/LUT mapping, physical routing, GTH configuration, CDC boundaries, timing closure, and real hardware bring-up.
-
----
-
-## Public / Private Boundary
-
-### Public repository
-
-- architecture and development notes
-- selected simulation and timing evidence
-- hardware-test direction and acceptance criteria
-- reproducible stress-test material
-- selected board-level measurements as they become available
-
-### Private lab
-
-- Raw Mode production RTL
-- exact GT Wizard integration and reset dependency
-- internal debug-bus bit assignments and training/checker implementation
-- exact XDC/TCL placement strategy
-- Pblock coordinates and LOC/BEL assignments
-- phase/alignment calibration scripts
-- proprietary implementation constraints
-
-The public repository documents the engineering direction and evidence chain. Exact physical implementation scripts remain private.
-
----
-
-## Collaboration
-
-Technical challenge, adversarial architecture review, and collaboration around FPGA market-data infrastructure, deterministic latency, GTH bring-up, and nanosecond-scale timing closure are welcome.
-
-**Email:** `ruansheng333@gmail.com`
-
-SnowSakura is an independent physical-layer engineering record built through direct iteration, routed timing evidence, and continuing hardware validation.
+SnowSakura-FPGA is finished as a public independent project. The hardware record remains; future work begins only through a defined private collaboration.
