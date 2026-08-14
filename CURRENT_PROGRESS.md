@@ -1,16 +1,16 @@
-# SnowSakura-FPGA — Final Completed State
+# SnowSakura-FPGA — Active Development State
 
 ## Status
 
-**Completed and frozen on 2026-07-25.**
+**Active development resumed on 2026-08-14 UTC.**
 
-The public SnowSakura-FPGA development cycle is finished. The final repository state records a real Puzhi ZU15EG optical laboratory chain, fabric-owned programmed transmission, Raw32 registered reception, bounded alignment, fixed HKEX OMD-C parsing, stateful order updates, 64-bit price-level aggregation, top-of-book selection, coherent snapshot export, implementation timing closure, Post-Implementation Timing Simulation, ILA evidence, and receiver Eye Scan evidence.
+The preserved SnowSakura-FPGA hardware baseline records a real Puzhi ZU15EG optical laboratory chain, fabric-owned programmed transmission, Raw32 registered reception, bounded alignment, fixed HKEX OMD-C parsing, stateful order updates, 64-bit price-level aggregation, top-of-book selection, coherent snapshot export, implementation timing closure, Post-Implementation Timing Simulation, ILA evidence, and receiver Eye Scan evidence.
 
-There is no active public RTL-development stage and no scheduled stream of incremental updates. The only remaining appendix is the final `10^15`-bit BER counter record and corresponding Eye Scan. This physical sign-off addition does not reopen RX C1/C2/C3, Parser P1, TX T1, XDC, Pblock, or the completed implementation. Active engineering focus is now moving to other repositories; this repository is retained as the final technical record and as the entry point for private bitstream or custom-protocol work.
+The next active stage is an independent dual-line A/B arbitration simulation. It will start from the preserved RX ×3 + Parser ×1 single-line boundary and prove sequence-aware eligibility, duplicate suppression, bounded skew handling, gap/reorder behaviour, reset/flush behaviour, payload conservation, and deterministic cycle latency before any arbitration RTL is attached to the live hardware top. The `10^15`-bit BER and Eye Scan record remains a separate physical measurement task.
 
-## Frozen hardware identity
+## Preserved hardware identity
 
-| Item | Frozen value |
+| Item | Preserved value |
 |---|---|
 | Device | `XCZU15EG-FFVB1156-2-I` |
 | Serial rate | 10.3125 Gb/s |
@@ -21,7 +21,7 @@ There is no active public RTL-development stage and no scheduled stream of incre
 | User-clock class | 322.265625 MHz operating point / 322.56 MHz timing target |
 | Registered fabric pipeline | RX ×3 + Parser ×1 + TX ×1 |
 
-## Final evidence
+## Preserved evidence
 
 | Boundary | Result |
 |---|---|
@@ -54,8 +54,8 @@ Golden fabric TX
 
 Simulation, synthesis, implementation, post-route timing, bitstream/ILA regression, Post-Implementation Timing Simulation, and Eye Scan are all represented in the final evidence package.
 
-## Final boundary
+## Active-boundary rule
 
 The completed public build uses a custom Raw32 laboratory source and RX Buffer ON. It is not a production 10GBASE-R HKEX feed, and the separate 36–37 ns RX/TX Double-Bypass architecture is not presented as a measured result.
 
-Future engineering, if any, is private and contract-driven: a defined target board, GT/clock configuration, protocol wire format, expected outputs, test vectors, and acceptance matrix. See [COLLABORATION.md](COLLABORATION.md).
+Active development now proceeds in this repository. The recovery reference is commit `ffe9d0b1f064ff5da0853f5fa18cf714adf60782` dated 2026-07-14 UTC; the active-resumption commit is dated 2026-08-14 UTC. Existing RX Buffer ON results remain evidence only for that measured configuration. The dual-line arbitration simulation must not borrow those results as proof for the RX/TX Double-Bypass path.
