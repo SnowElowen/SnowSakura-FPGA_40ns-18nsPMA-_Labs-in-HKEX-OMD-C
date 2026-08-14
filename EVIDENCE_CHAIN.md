@@ -1,12 +1,14 @@
-# SnowSakura-FPGA — Final Evidence Chain
+# SnowSakura-FPGA — Preserved Evidence Chain
 
-## Final public release — 2026-07-25
+## Preserved hardware release — 2026-07-25
 
-This document is the final evidence index for the completed SnowSakura-FPGA public project. It separates real hardware, implemented timing, protocol behavior, and architectural targets so that no claim crosses an unmeasured boundary.
+## Active development resumed — 2026-08-14 UTC
+
+This document is the preserved evidence index for SnowSakura-FPGA. Active development resumed on 2026-08-14 UTC. It separates real hardware, implemented timing, protocol behavior, and architectural targets so that no claim crosses an unmeasured boundary.
 
 ## Build identity
 
-| Item | Final value |
+| Item | Preserved value |
 |---|---|
 | Repository | `SnowElowen/SnowSakura-FPGA_HKEX-OMD-C_40ns-Lab` |
 | Device | Xilinx Zynq UltraScale+ `XCZU15EG-FFVB1156-2-I` |
@@ -15,7 +17,7 @@ This document is the final evidence index for the completed SnowSakura-FPGA publ
 | GT baseline | Raw Mode, RX Buffer ON, TX Buffer Bypass |
 | Source ownership | Golden top fabric TX source |
 | Protocol source | custom Raw32 HKEX OMD-C laboratory stream |
-| Public state | completed and frozen; only final `10^15`-bit BER and Eye Scan appendix remains |
+| Public state | active development resumed 2026-08-14 UTC; preserved single-line RX Buffer ON evidence |
 
 ## Evidence matrix
 
@@ -52,14 +54,14 @@ The Heartbeat has no MsgType. Any retained MsgType bus value is invalid when `Ms
 - The approximately 50 ns single-lane result belongs to the tested RX Buffer ON architecture.
 - The 36–37 ns RX/TX Double-Bypass blade is preserved only as an architecture target and is not labelled as completed hardware.
 
-## Remaining physical sign-off appendix
+## Active continuation boundary
 
-The only planned addition to this completed repository is the final X0Y7/SFP1 physical-link record: a `10^15`-bit BER run and the corresponding Eye Scan. The appendix will publish the exact tested configuration, pattern, elapsed time, total bits, error count, and receiver plot. It is a measurement closeout, not a new RTL-development stage.
+The next engineering deliverable is a self-owned dual-line A/B arbitration simulation. It is outside the tested single-line RX Buffer ON physical result and therefore begins with a separate simulation evidence matrix: stimulus provenance, source-line timing, event and payload scoreboards, fixed-cycle latency checks, duplicate/gap/reorder cases, and explicit pass/fail counters.
 
-Current engineering work is moving to other repositories.
+A final X0Y7/SFP1 `10^15`-bit BER run and matching Eye Scan remain separate physical measurement tasks. They do not establish Double-Bypass or dual-line arbitration behaviour.
 
-## Final acceptance result
+## Preserved acceptance result
 
-The public project closes the intended independent laboratory scope: source ownership, physical link, registered receive boundary, bounded alignment, protocol reconstruction, stateful downstream logic, post-route timing, implemented timing simulation, and hardware observation form one consistent evidence chain.
+The preserved single-line laboratory scope establishes source ownership, physical link, registered receive boundary, bounded alignment, protocol reconstruction, stateful downstream logic, post-route timing, implemented timing simulation, and hardware observation as one evidence chain.
 
-The project is complete and frozen. Any future implementation begins as a separate private collaboration with its own build identity and evidence matrix.
+The active dual-line arbitration stage begins in this repository with its own build identity and evidence matrix. It must not inherit the single-line RX Buffer ON timing or optical results as Double-Bypass proof.
