@@ -1,11 +1,12 @@
 # SnowSakura-FPGA
 
-> **PROJECT STATUS — COMPLETED AND FROZEN**  
-> Final public update: **2026-07-25**
+> **PROJECT STATUS — ACTIVE DEVELOPMENT RESUMED**  
+> Resume record: **2026-08-14 UTC**  
+> Recovery reference: **2026-07-14 UTC**, commit `ffe9d0b1f064ff5da0853f5fa18cf714adf60782` (active 40 ns research README)
 
 SnowSakura-FPGA is an independent physical-layer FPGA engineering record built on a Puzhi ZU15EG. It closes a real 10.3125 Gb/s optical laboratory path from fabric-owned TX data through GTH/SFP/OM4 reception, bounded Raw32 alignment, registered HKEX OMD-C parsing, order-state updates, price-level aggregation, top-of-book selection, and registered snapshot export.
 
-The public project is complete. Its implementation baseline and evidence are frozen; there will be no further routine public development updates. The only planned closeout addition is the final `10^15`-bit BER counter record and the corresponding Eye Scan evidence. That physical sign-off appendix will not reopen the completed RTL architecture. My active engineering focus is now moving to other repositories, while this repository remains online as a technical record and as an entry point for serious private bitstream or protocol collaboration.
+SnowSakura-FPGA is active again. The RX Buffer ON laboratory evidence is retained as an immutable provenance boundary; it is not deleted, downgraded, or relabelled as Double-Bypass proof. Active work now resumes from that known hardware baseline toward the deterministic RX/TX Double-Bypass research blade: first an independent dual-line A/B arbitration simulation, then the matching bounded RTL and physical implementation campaign.
 
 ## Final result at a glance
 
@@ -115,11 +116,11 @@ The Golden source is a custom Raw32 laboratory feed. It is not described as a pr
 
 The Eye Scan proves receiver sampling margin for the tested optical path. The recorded BERT exercise covers `10^8` bits; it is not relabelled as a `10^15`-bit qualification. The 36–37 ns Double-Bypass design remains separate from the completed RX Buffer ON evidence.
 
-## Remaining physical sign-off appendix
+## Active continuation — dated recovery boundary
 
-A final `10^15`-bit BER run and its matching Eye Scan will be added after the long-duration physical-link test is complete. The published appendix will identify the exact GT configuration, optical direction, pattern, elapsed time, tested bit count, and error count. Until that record is posted, the current public BERT depth remains `10^8` bits.
+The resumption point is this commit, dated **2026-08-14 UTC**. It follows the original active 40 ns research record at `ffe9d0b1f064ff5da0853f5fa18cf714adf60782` (2026-07-14 UTC) while preserving the later RX Buffer ON laboratory evidence. The immediate deliverable is a self-owned dual-line A/B arbitration simulation with deterministic cycle accounting, duplicate masking, sequence-aware eligibility, skew/gap/reorder tests, and a scoreboard. No 36–37 ns board-level claim will be made before the exact Double-Bypass build has post-route STA/SDF and hardware evidence.
 
-This is a final measurement addition only. SnowSakura-FPGA remains completed and frozen, and current development is moving to other repositories.
+The `10^15`-bit BER run and matching Eye Scan remain a separate physical measurement task.
 
 ## Protocol and bitstream collaboration
 
@@ -138,4 +139,4 @@ See [COLLABORATION.md](COLLABORATION.md) for the required technical contract.
 - [EVIDENCE_CHAIN.md](EVIDENCE_CHAIN.md) — evidence matrix and claim boundaries
 - [COLLABORATION.md](COLLABORATION.md) — private bitstream and custom-protocol cooperation
 
-SnowSakura-FPGA is finished as a public independent project. The hardware record remains; future work begins only through a defined private collaboration.
+SnowSakura-FPGA is active as an independent engineering project again. The recorded hardware evidence remains intact; the next public boundary is the dual-line arbitration simulation and its explicit pass/fail evidence.
