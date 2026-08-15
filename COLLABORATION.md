@@ -1,14 +1,25 @@
-# Private Bitstream and Protocol Collaboration
+# Collaboration
 
-SnowSakura-FPGA is complete as a public project, but the engineering can be applied privately to a defined board and protocol.
+## Roadmap and availability
 
-## Available collaboration
+SnowSakura-FPGA is a continuing physical-layer engineering and evidence record, not a finished public release.
 
-- Board-specific FPGA `.bit` delivery with the matching `.ltx` debug package when appropriate.
+By my second-year summer at university, I will continue building SnowSakura and extend it across the full range of targeted binary market-data protocols. The public evidence chain will be expanded progressively as each layer is completed: protocol-validation results, post-route STA, SDF timing simulation, hardware link evidence, and measured results.
+
+From my second-year summer onward, I will be available for either:
+
+- **IP-isolated internship** arrangements; or
+- **NDA-based technical engagements** that do not require an internship arrangement.
+
+Firms, hedge funds, and specialist recruiters in **Hong Kong** or **Singapore** may contact me directly from that point onward.
+
+## Potential technical scope
+
+- Board-specific FPGA `.bit` delivery with the matching `.ltx` debug package where appropriate.
 - Custom exchange-feed and proprietary binary-protocol framing, normalization, fixed-field parsing, registered state updates, and deterministic output release.
-- GTH/GTY lane bring-up, reference-clock/reset ownership, polarity, buffer-mode, Raw Mode, PRBS/BERT, Eye Scan, and ILA evidence.
+- GTH/GTY lane bring-up, reference-clock/reset ownership, polarity, buffer mode, Raw Mode, PRBS/BERT, Eye Scan, and ILA evidence.
 - UltraScale+ physical implementation: FDRE/LUT/CARRY8 structure, fanout localization, Pblock/placement work, XDC/Tcl constraints, synthesis, implementation, and post-route STA.
-- Protocol migration beyond HKEX OMD-C, provided that the wire format and target hardware contract are defined.
+- Protocol migration beyond HKEX OMD-C, provided that the wire format and target-hardware contract are defined.
 
 ## Required technical contract
 
@@ -23,15 +34,11 @@ A serious request should provide:
 7. acceptance criteria for functional simulation, post-route STA, hardware ILA, BER/Eye Scan, and measured latency;
 8. whether the deliverable is a private `.bit/.ltx` package, an integration build, architecture review, or protocol implementation.
 
-## Delivery boundary
+## Delivery and IP boundary
 
-A compiled bitstream is tied to an exact device, board, GT configuration, clocks, lane map, constraints, and protocol contract. A `.bit` file from one hardware identity is not a portable executable for another board. Therefore delivery begins only after those inputs are frozen.
+A compiled bitstream is tied to an exact device, board, GT configuration, clocks, lane map, constraints, and protocol contract. A `.bit` file from one hardware identity is not a portable executable for another board. Delivery begins only after those inputs are frozen.
 
-Private production RTL, GT integration, XDC/Tcl physical constraints, calibration logic, and board-specific implementation files are not published by default. Their availability depends on the agreed collaboration scope.
-
-## Protocol scope
-
-The architecture is protocol-independent at the registered normalization boundary. I can implement other exchange feeds, Ethernet-derived market-data formats, and proprietary binary protocols; the required PCS/framing work is explicitly included when the incoming wire stream requires it and is never hidden inside parser latency.
+Private production RTL, GT integration, XDC/Tcl physical constraints, calibration logic, and board-specific implementation files are not published by default. Their availability depends on the agreed IP-isolation or NDA engagement scope.
 
 ## Contact
 
