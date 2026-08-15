@@ -690,8 +690,12 @@ Do not ask for the private XDC scripts. The public repository is intended to sho
 
 ## Collaboration
 
-If you want to challenge the architecture, discuss timing paths, review the physical assumptions, or collaborate around FPGA-based HFT infrastructure, contact:
+### Roadmap and availability
+
+By my second-year summer at university, I will continue building SnowSakura and extend it across the full range of targeted binary market-data protocols. The public evidence chain will be expanded progressively as each layer is completed: protocol-validation results, post-route STA, SDF timing simulation, hardware link evidence, and measured results.
+
+From my second-year summer onward, I will be available to discuss **IP-isolated internships** and **NDA-based technical engagements**. Firms, hedge funds, and specialist recruiters in **Hong Kong** or **Singapore** may contact me directly.
 
 **Email:** `ruansheng333@gmail.com`
 
-SnowSakura is not a polished institutional project. It is an aggressive physical-layer engineering record built through direct iteration, timing evidence, board bring-up, and continued hardware validation.
+The public repository will continue to document the engineering direction and supporting evidence. Exact Raw Mode RTL, XDC/TCL physical-implementation strategy, Pblock coordinates, LOC/BEL mappings, and phase/alignment calibration scripts remain private.
