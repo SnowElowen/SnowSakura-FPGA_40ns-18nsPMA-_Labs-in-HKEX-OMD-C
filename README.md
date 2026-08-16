@@ -131,7 +131,6 @@ This was the starting environment:
 - one pen
 - public documentation
 - repeated engineering iteration
-- and one GPT
 
 ![lab](img/mylab.jpeg)
 
